@@ -21,8 +21,8 @@ int main()
 		"Hello SFML");
 
 	Color color = Color::Blue;
-	
-	
+
+
 	vector<Snake> snake;
 	Snake newSnake(Color::Blue, window.getSize().x / 100,
 		Vector2f(window.getSize().x / 10, window.getSize().y / 10));
@@ -30,10 +30,26 @@ int main()
 	newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
 	int index = 0;
 	int snakeSize = 1;
-	bool up = false, down = false, left = false, right = false, game = false;
+	bool up = false, down = false, left = false, right = false, game = false, exit = false;
 	snake.push_back(newSnake);
-	newSnake.setPosition(snake[0].getPosition().x -( 2 * snake[0].getRadius()), snake[0].getPosition().y);
-	
+	newSnake.setPosition(snake[0].getPosition().x - (2 * snake[0].getRadius()), snake[0].getPosition().y);
+
+	Text menuText;
+	string Menu = "Snake\nCreated by: Michael Smith, Devin Hollander, Demetrius Anderson\n";
+
+	Menu += "Press 1 to play\nPress 2 to view high scores \nPress 3 to exit";
+
+	menuText.setString(Menu);
+
+	menuText.setFont(font);
+	// added new font size to fit screen
+	menuText.setCharacterSize(16);
+	menuText.setPosition(0, 0);
+
+	Text text;
+	text.setPosition(200, 200);
+	text.setFont(font);
+
 	//snake.push_back(newSnake);
 
 	//newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
@@ -41,41 +57,39 @@ int main()
 	while (window.isOpen())
 	{
 		Event event;
+		exit = false;
 		/*while (window.pollEvent(event))
 		{
-			
-		
-			
+
+
+
 		}*/
-		Text menuText;
-		string Menu = "Snake\nCreated by: Michael Smith, Devin Hollander, Demetrius Anderson\n";
-		
-		Menu += "Press 1 to play\n Press 2 to view high scores \n press 3 to exit";
 
-		menuText.setString(Menu);
-
-		menuText.setFont(font);
-		menuText.setPosition(0, 0);
 		window.draw(menuText);
 		window.display();
-
-		while (window.pollEvent(event))
-		{
-			event.type == Event::KeyPressed;
-			while (event.key.code != Keyboard::Num1 && event.key.code != Keyboard::Num2 && event.key.code != Keyboard::Num3)
+		// this while loop keeps the program from skipping out of the event poll 
+		while (game == false) {
+			while (window.pollEvent(event))
 			{
-				if (event.key.code == Keyboard::Num1)
-				{
-					game = true;
-				}
-				if (event.key.code == Keyboard::Num2)
-				{
+				// added if statement around this because we forgot it
+				if (event.type == Event::KeyPressed) {
+					// this while statement was making it impossible to advance to the game
+					//while (event.key.code != Keyboard::Num1 && event.key.code != Keyboard::Num2 && event.key.code != Keyboard::Num3)
+					//{
+					if (event.key.code == Keyboard::Num1)
+					{
+						game = true;
+					}
+					if (event.key.code == Keyboard::Num2)
+					{
 
-				}
-				if (event.key.code == Keyboard::Num3)
-				{
-					window.close();
-					return 0;
+					}
+					if (event.key.code == Keyboard::Num3)
+					{
+						window.close();
+						return 0;
+					}
+					//}
 				}
 			}
 		}
@@ -129,22 +143,22 @@ int main()
 
 				/*if (event.type == Event::KeyReleased)
 				{
-					if (event.key.code == Keyboard::Up)	//up
-					{
-						up = false;
-					}
-					else if (event.key.code == Keyboard::Down)	//down
-					{
-						down = false;
-					}
-					else if (event.key.code == Keyboard::Left)	//left
-					{
-						left = false;
-					}
-					else if (event.key.code == Keyboard::Right)	//right
-					{
-						right = false;
-					}
+				if (event.key.code == Keyboard::Up)	//up
+				{
+				up = false;
+				}
+				else if (event.key.code == Keyboard::Down)	//down
+				{
+				down = false;
+				}
+				else if (event.key.code == Keyboard::Left)	//left
+				{
+				left = false;
+				}
+				else if (event.key.code == Keyboard::Right)	//right
+				{
+				right = false;
+				}
 				}
 				*/
 
@@ -203,28 +217,28 @@ int main()
 			/*
 			if (index % 50 == 0)
 			{
-				int prevX = snake[0].getPosition().x;
-				int prevY = snake[0].getPosition().y;
-				if (up == true)	//up
-				{
-					snake[0].move(0, -2 * snake[0].getRadius());
-					snake[1].setPosition(prevX, prevY);
-				}
-				if (down == true)	//down
-				{
-					snake[0].move(0, 2 * snake[0].getRadius());
-					snake[1].setPosition(prevX, prevY);
-				}
-				if (left == true)	//left
-				{
-					snake[0].move(-2 * snake[0].getRadius(), 0);
-					snake[1].setPosition(prevX, prevY);
-				}
-				if (right == true)	//right
-				{
-					snake[0].move(2 * snake[0].getRadius(), 0);
-					snake[1].setPosition(prevX, prevY);
-				}
+			int prevX = snake[0].getPosition().x;
+			int prevY = snake[0].getPosition().y;
+			if (up == true)	//up
+			{
+			snake[0].move(0, -2 * snake[0].getRadius());
+			snake[1].setPosition(prevX, prevY);
+			}
+			if (down == true)	//down
+			{
+			snake[0].move(0, 2 * snake[0].getRadius());
+			snake[1].setPosition(prevX, prevY);
+			}
+			if (left == true)	//left
+			{
+			snake[0].move(-2 * snake[0].getRadius(), 0);
+			snake[1].setPosition(prevX, prevY);
+			}
+			if (right == true)	//right
+			{
+			snake[0].move(2 * snake[0].getRadius(), 0);
+			snake[1].setPosition(prevX, prevY);
+			}
 			}*/
 			index++;
 			window.clear();
@@ -236,7 +250,7 @@ int main()
 			//window.draw(snake[0]);
 			//window.draw(snake[1]);
 			window.draw(newDot);
-			
+
 			if (snake[0].getPosition().x < 0 || snake[0].getPosition().x > window.getSize().x - (2 * snake[0].getRadius()) ||
 				snake[0].getPosition().y < 0 || snake[0].getPosition().y > window.getSize().y - (2 * snake[0].getRadius()))
 			{
@@ -256,21 +270,18 @@ int main()
 				snake.push_back(newSnake);
 				snakeSize++;
 			}
-			
+
 
 
 			window.display();
 		}
-	
-		
-		 
-		snake.clear();
-		
 
-		Text text;
-		text.setColor(Color::White);
-		text.setPosition(100, 100);
-		text.setFont(font);
+
+
+		snake.clear();
+
+
+		
 
 		string message = "Game over\nYour Score was ";
 		message += to_string(snakeSize);
@@ -278,16 +289,20 @@ int main()
 		text.setString(message);
 		window.draw(text);
 		window.display();
-		
-		while (window.pollEvent(event))
-		{
-			while (event.key.code != Keyboard::E)
+		// this while loop keeps the event polling until the letter e is pressed
+		while (exit == false) {
+			while (window.pollEvent(event))
 			{
+				if (event.type == Event::KeyPressed) {
+					//while (event.key.code != Keyboard::E)
+					//{
 
-				if (event.key.code == Keyboard::E)
-				{
-					game = false;
-					window.clear();
+					if (event.key.code == Keyboard::E)
+					{
+						exit = true;
+						window.clear();
+					}
+					//}
 				}
 			}
 		}
@@ -297,4 +312,3 @@ int main()
 
 	return 0;
 }
-
