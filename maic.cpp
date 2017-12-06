@@ -1,4 +1,4 @@
-ragma once
+#pragma once
 #include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
 #include <vector>
@@ -9,7 +9,7 @@ ragma once
 #include "obstacle.h"
 #include <iostream>
 #include <fstream>
-#include "record.h"
+//#include "record.h"
 #include <string>
 using namespace sf;
 using namespace std;
@@ -31,7 +31,7 @@ int main()
 	vector<Obstacle> obstacle;
 	Snake newSnake(Color::Blue, window.getSize().x / 100,
 		Vector2f(window.getSize().x / 10, window.getSize().y / 10));
-	Dot newDot(Color::Blue, window.getSize().x / 100, Vector2f(12, 12));
+	Dot newDot(Color::Green, window.getSize().x / 100, Vector2f(12, 12));
 	newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
 	int index = 0;
 	int snakeSize = 1, obstacleAmount = 0;
@@ -65,18 +65,23 @@ int main()
 	// note that it crashes if the file is empty.........
 	fstream highScores;
 	highScores.open("HighScores.txt");
-	vector<Record> records;
-	std::string name;
-	std::string scoreStr;
-	int score;
+	//vector<Record> records;
+	string name;
+	string scoreStr;
+	vector<int> score;
 	while (!highScores.eof())
 	{
+		/*
 		getline(highScores, name);
 		getline(highScores, scoreStr);
-		score = std::stoi(scoreStr);
+		score = stoi(scoreStr);
 		records.push_back(Record(name, score));
+		*/
+		getline(highScores, scoreStr);
+		if (scoreStr!= "")
+			score.push_back(stoi(scoreStr));
 	}
-
+	highScores.close();
 	while (window.isOpen())
 	{
 		Event event;
@@ -104,19 +109,47 @@ int main()
 					// read from file to display high scores
 					if (event.key.code == Keyboard::Num2)
 					{
-						std::string line = "High Scores\n";
-						for (int i = 0; i < records.size(); i++)
+						///////////Sorts high Scores////////
+						int i, j, temp;
+						for (int i = 0; i < score.size(); i++)
 						{
-							line += std::to_string(i+1);
-							line += ". ";
-							line += records[i].getName();
-							line += "     ";
-							line += std::to_string(records[i].getScore());
-							line += "\n";
+							temp = score[i];
+							j = i;
+							while (j > 0 && score[j] < score[j - 1])
+							{
+								temp = score[j];
+								score[j] = score[j - 1];
+								score[j - 1] = temp;
+								j--;
+							}
+
 						}
-						text.setString(line);
-						window.draw(text);
-						window.display();
+						//////////////////////////////////////////////////////
+						if (score.size() > 1)		//only displays if there is a high score
+						{
+							window.clear();
+							std::string line = "High Scores\n";
+
+							for (int i = 0; i < 5 && i < score.size() - 1; i++)			//runs 5 times or the amount of items in the vector
+							{
+								line += std::to_string(i + 1);
+								line += ". ";
+								line += std::to_string(score[score.size() - (i + 1)]); //starts at the end of the vector and moves down
+								line += "\n";
+							}
+							line += "Press 1 to play";
+							text.setString(line);
+							window.draw(text);
+
+							window.display();
+						}
+						else
+						{
+							string line = "There are no scores Yet";
+							text.setString(line);
+							window.draw(text);
+							window.display();
+						}
 					}
 					if (event.key.code == Keyboard::Num3)
 					{
@@ -209,6 +242,26 @@ int main()
 				}
 				else {
 					Obstacle newObstacle(Color::Red, Vector2f(window.getSize().x / 30, window.getSize().y / 60), Vector2f(0, 0));
+					do {
+						newObstacle.setPosition(Vector2f(rand() % (window.getSize().x / 12) * 12, rand() % (window.getSize().y / 12) * 12));
+						int i = 0;
+						while (i < snakeSize && overlapping != true) {
+							if (snake[i].getPosition().x == newObstacle.getPosition().x && snake[i].getPosition().y == newObstacle.getPosition().y) {
+								overlapping = true;
+							}
+							i++;
+						}
+						i = 0;
+						while (i < obstacleAmount && overlapping != true) {
+							if (obstacle[i].getPosition().x == newObstacle.getPosition().x && obstacle[i].getPosition().y == newObstacle.getPosition().y) {
+								overlapping = true;
+							}
+							i++;
+						}
+						if (newDot.getPosition().x == newObstacle.getPosition().x && newDot.getPosition().y == newObstacle.getPosition().y) {
+							overlapping = true;
+						}
+					} while (overlapping == true);
 					newObstacle.setPosition(Vector2f(rand() % (window.getSize().x / 12) * 12, rand() % (window.getSize().y / 12) * 12));
 					obstacle.push_back(newObstacle);
 					obstacleAmount++;
@@ -242,7 +295,7 @@ int main()
 				i++;
 			}
 
-			if (index % 50 == 0)
+			if (index % 250 == 0)
 			{
 				for (int i = 0; i < snakeSize; i++)
 				{
@@ -330,12 +383,14 @@ int main()
 
 			window.display();
 		}
+		
 		snake.clear();
 
 		string message = "Game over\nYour Score was ";
 		message += to_string(snakeSize);
 		message += "\nPress E to return to menu";
-
+		window.clear();
+		
 		//// checking if high score was beat to prompt new high score
 		//for (int i = 0; i < records.size(); i++)
 		//{
@@ -348,6 +403,16 @@ int main()
 		//		break;
 		//	}
 		//}
+		score.push_back(snakeSize);
+
+
+		highScores.open("HighScores.txt");
+		for (int i = 0; i < score.size() - 1; i++)
+		{
+			highScores << score[i] << endl;
+		}
+		highScores.close();
+
 		snakeSize = 1;
 		obstacleAmount = 0;
 		text.setString(message);
@@ -398,6 +463,7 @@ int main()
 
 					if (event.key.code == Keyboard::E)
 					{
+						
 						exit = true;
 						window.clear();
 					}
