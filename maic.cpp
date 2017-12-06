@@ -41,7 +41,9 @@ int main()
 	newSnake.setPosition(snake[0].getPosition().x - (2 * snake[0].getRadius()), snake[0].getPosition().y);
 
 	Text menuText;
-	string Menu = "Snake\nCreated by: Michael Smith, Devin Hollander, Demetrius Anderson\n";
+	string Menu = "Snake\nCreated by: \nMichael Smith:  Section 6\nDevin Hollander:  Section 7\nDemetrius Anderson: Section \n";
+	Menu += "Collect as many dots as possible.\n";
+	Menu += "If the head of your snake runs off the screen, runs into the body of your snake,\nor hits an obstacle you lose\n";
 
 	Menu += "Press 1 to play\nPress 2 to view high scores \nPress 3 to exit";
 
@@ -111,7 +113,7 @@ int main()
 					{
 						///////////Sorts high Scores////////
 						int i, j, temp;
-						for (int i = 0; i < score.size(); i++)
+						for (i = 0; i < score.size(); i++)
 						{
 							temp = score[i];
 							j = i;
@@ -214,6 +216,7 @@ int main()
 				overlapping = false;
 				if (rand() % 2 == 1) {
 					Obstacle newObstacle(Color::Red, Vector2f(window.getSize().x / 60, window.getSize().y / 30), Vector2f(0, 0));
+					
 					do {
 						newObstacle.setPosition(Vector2f(rand() % (window.getSize().x / 12) * 12, rand() % (window.getSize().y / 12) * 12));
 						int i = 0;
@@ -234,6 +237,10 @@ int main()
 							overlapping = true;
 						}
 					} while (overlapping == true);
+					Vector2f temp;
+					temp.x = newObstacle.getPosition().x;
+					temp.y = newObstacle.getPosition().y + (2 * snake[0].getRadius());
+					newObstacle.setSecondPosition(temp);
 					obstacle.push_back(newObstacle);
 					obstacleAmount++;
 					//window.draw(newObstacle);
@@ -244,6 +251,7 @@ int main()
 					Obstacle newObstacle(Color::Red, Vector2f(window.getSize().x / 30, window.getSize().y / 60), Vector2f(0, 0));
 					do {
 						newObstacle.setPosition(Vector2f(rand() % (window.getSize().x / 12) * 12, rand() % (window.getSize().y / 12) * 12));
+						
 						int i = 0;
 						while (i < snakeSize && overlapping != true) {
 							if (snake[i].getPosition().x == newObstacle.getPosition().x && snake[i].getPosition().y == newObstacle.getPosition().y) {
@@ -262,7 +270,10 @@ int main()
 							overlapping = true;
 						}
 					} while (overlapping == true);
-					newObstacle.setPosition(Vector2f(rand() % (window.getSize().x / 12) * 12, rand() % (window.getSize().y / 12) * 12));
+					Vector2f temp;
+					temp.x = newObstacle.getPosition().x + (2 * snake[0].getRadius());
+					temp.y = newObstacle.getPosition().y;
+					newObstacle.setSecondPosition(temp);
 					obstacle.push_back(newObstacle);
 					obstacleAmount++;
 					//window.draw(newObstacle);
@@ -281,6 +292,7 @@ int main()
 					right = false;
 					game = false;
 				}
+				
 			}
 			// checks for collision with obstacle
 			int i = 0;
@@ -291,10 +303,20 @@ int main()
 					left = false;
 					right = false;
 					game = false;
+				
+				}
+				if (obstacle[i].getSecondPosition().x == snake[0].getPosition().x && obstacle[i].getSecondPosition().y == snake[0].getPosition().y)
+				{
+					up = false;
+					down = false;
+					left = false;
+					right = false;
+					game = false;
 				}
 				i++;
 			}
-
+			i = 0;
+	
 			if (index % 250 == 0)
 			{
 				for (int i = 0; i < snakeSize; i++)
@@ -385,6 +407,7 @@ int main()
 		}
 		
 		snake.clear();
+		obstacle.clear();
 
 		string message = "Game over\nYour Score was ";
 		message += to_string(snakeSize);
@@ -403,16 +426,20 @@ int main()
 		//		break;
 		//	}
 		//}
-		score.push_back(snakeSize);
-
+		if (snakeSize > score[0])
+			score.push_back(snakeSize);
+		if (score.size() > 5)
+		{
+			score.erase(score.begin());
+		}
 
 		highScores.open("HighScores.txt");
-		for (int i = 0; i < score.size() - 1; i++)
+		for (int i = 0; i < score.size(); i++)
 		{
 			highScores << score[i] << endl;
 		}
 		highScores.close();
-
+		
 		snakeSize = 1;
 		obstacleAmount = 0;
 		text.setString(message);
