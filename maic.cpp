@@ -22,7 +22,37 @@ int main()
 	srand((unsigned int)time(NULL));
 
 	RenderWindow window(VideoMode(600, 600),
-		"Hello SFML");
+		"Snake");
+	int randomNum = 0, gameSpeed;
+	randomNum = rand() % 4;
+	Texture texture;
+	if (randomNum == 0) {
+		if (!texture.loadFromFile("Background1.jpeg")) {
+
+		}
+		gameSpeed = 10;
+	}
+	else if (randomNum == 1) {
+		if (!texture.loadFromFile("Background2.jpeg")) {
+
+		}
+		gameSpeed = 15;
+	}
+	else if (randomNum == 2) {
+		if (!texture.loadFromFile("Background3.jpeg")) {
+
+		}
+		gameSpeed = 15;
+	}
+	else if (randomNum == 3) {
+		if (!texture.loadFromFile("Background4.jpg")) {
+
+		}
+		gameSpeed = 10;
+	}
+	Sprite background(texture);
+	Vector2f windowDimensions(window.getSize().x, window.getSize().y);
+	background.setScale(windowDimensions.x / background.getLocalBounds().width, windowDimensions.y / background.getLocalBounds().height);
 
 	Color color = Color::Blue;
 	Vector2f otherPosition(0, 0);
@@ -33,7 +63,7 @@ int main()
 	Dot newDot(Color::Green, window.getSize().x / 100, Vector2f(12, 12));
 	newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
 	int index = 0;
-	int snakeSize = 1, obstacleAmount = 0;
+	int snakeSize = 1, obstacleAmount = 0, multiples;
 	bool up = false, down = false, left = false, right = false, game = false, exit = false, obstacleUsed = false, overlapping = false,
 		collision = false;
 	snake.push_back(newSnake);
@@ -43,6 +73,7 @@ int main()
 	string Menu = "Snake\nCreated by: Michael Smith, Devin Hollander, Demetrius Anderson\n";
 	Menu += "Press 1 to play\nPress 2 to view game rules\nPress 3 to view high scores \nPress 4 to exit";
 	menuText.setString(Menu);
+	menuText.setFillColor(Color::Cyan);
 	menuText.setFont(font);
 	// added new font size to fit screen
 	menuText.setCharacterSize(16);
@@ -54,7 +85,8 @@ int main()
 	rules += "4. In order to survive your snake must avoid the obstacles, stay within the bounds \nof the screen, and cannot collide with itself.\n";
 	rules += "5. That also means you cannot move back on yourself. Meaning if you were traveling \nleft you cannot suddenly go to the right without first having gone up or down.\n";
 	rules += "Press 1 to play game, 3 to view high scores, or 4 to exit\n";
-	rulesText.setPosition(0, 0);
+	rulesText.setPosition(0, 100);
+	rulesText.setFillColor(Color::Cyan);
 	rulesText.setFont(font);
 	rulesText.setString(rules);
 	rulesText.setCharacterSize(16);
@@ -62,6 +94,7 @@ int main()
 	Text text;
 	text.setPosition(200, 200);
 	text.setFont(font);
+	text.setFillColor(Color::Cyan);
 
 	//snake.push_back(newSnake);
 
@@ -94,10 +127,11 @@ int main()
 		Event event;
 		exit = false;
 		collision = false;
+		
 		/*while (window.pollEvent(event))
 		{
 		}*/
-
+		window.draw(background);
 		window.draw(menuText);
 		window.display();
 		// this while loop keeps the program from skipping out of the event poll 
@@ -116,6 +150,7 @@ int main()
 					if (event.key.code == Keyboard::Num2)
 					{
 						window.clear();
+						window.draw(background);
 						window.draw(rulesText);
 						window.display();
 					}
@@ -152,6 +187,7 @@ int main()
 							}
 							line += "Press 1 to play";
 							text.setString(line);
+							window.draw(background);
 							window.draw(text);
 
 							window.display();
@@ -160,6 +196,7 @@ int main()
 						{
 							string line = "There are no scores Yet";
 							text.setString(line);
+							window.draw(background);
 							window.draw(text);
 							window.display();
 						}
@@ -174,10 +211,12 @@ int main()
 			}
 		}
 		window.clear();
+		window.draw(background);
 		snake.push_back(newSnake);
 
 		while (game == true)
 		{
+			window.draw(background);
 			window.draw(newDot);
 			window.draw(snake[0]);
 			Event event;
@@ -349,7 +388,7 @@ int main()
 				i++;
 			}
 
-			if (index % 50 == 0)
+			if (index % gameSpeed == 0)
 			{
 				for (int i = 0; i < snakeSize; i++)
 				{
@@ -384,6 +423,7 @@ int main()
 			}
 			index++;
 			window.clear();
+			window.draw(background);
 
 			for (int i = 0; i < snakeSize; i++)
 			{
@@ -434,6 +474,9 @@ int main()
 				snake.push_back(newSnake);
 				snakeSize++;
 				obstacleUsed = false;
+				if (snakeSize % 10 == 0) {
+						gameSpeed -= 1;
+				}
 			}
 
 
@@ -469,10 +512,15 @@ int main()
 			highScores << score[i] << endl;
 		}
 		highScores.close();
-
+		
+		multiples = snakeSize / 10;
+		for (int i = 0; i < multiples; i++) {
+			gameSpeed += 1;
+		}
 		snakeSize = 1;
 		obstacleAmount = 0;
 		text.setString(message);
+		window.draw(background);
 		window.draw(text);
 		window.display();
 
