@@ -1,4 +1,4 @@
-#pragma once
+ragma once
 #include "SFML/Window.hpp"
 #include "SFML/Graphics.hpp"
 #include <vector>
@@ -7,7 +7,10 @@
 #include "snake.h"
 #include "dot.h"
 #include "obstacle.h"
-
+#include <iostream>
+#include <fstream>
+#include "record.h"
+#include <string>
 using namespace sf;
 using namespace std;
 
@@ -57,6 +60,23 @@ int main()
 
 	//newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
 
+
+	// load high scores
+	// note that it crashes if the file is empty.........
+	fstream highScores;
+	highScores.open("HighScores.txt");
+	vector<Record> records;
+	std::string name;
+	std::string scoreStr;
+	int score;
+	while (!highScores.eof())
+	{
+		getline(highScores, name);
+		getline(highScores, scoreStr);
+		score = std::stoi(scoreStr);
+		records.push_back(Record(name, score));
+	}
+
 	while (window.isOpen())
 	{
 		Event event;
@@ -64,9 +84,6 @@ int main()
 		collision = false;
 		/*while (window.pollEvent(event))
 		{
-
-
-
 		}*/
 
 		window.draw(menuText);
@@ -84,9 +101,22 @@ int main()
 					{
 						game = true;
 					}
+					// read from file to display high scores
 					if (event.key.code == Keyboard::Num2)
 					{
-
+						std::string line = "High Scores\n";
+						for (int i = 0; i < records.size(); i++)
+						{
+							line += std::to_string(i+1);
+							line += ". ";
+							line += records[i].getName();
+							line += "     ";
+							line += std::to_string(records[i].getScore());
+							line += "\n";
+						}
+						text.setString(line);
+						window.draw(text);
+						window.display();
 					}
 					if (event.key.code == Keyboard::Num3)
 					{
@@ -99,7 +129,7 @@ int main()
 		}
 		window.clear();
 		snake.push_back(newSnake);
-		
+
 		while (game == true)
 		{
 			window.draw(newDot);
@@ -145,36 +175,7 @@ int main()
 						}
 					}
 				}
-
-				/*if (event.type == Event::KeyReleased)
-				{
-				if (event.key.code == Keyboard::Up)	//up
-				{
-				up = false;
-				}
-				else if (event.key.code == Keyboard::Down)	//down
-				{
-				down = false;
-				}
-				else if (event.key.code == Keyboard::Left)	//left
-				{
-				left = false;
-				}
-				else if (event.key.code == Keyboard::Right)	//right
-				{
-				right = false;
-				}
-				}
-				*/
-
-
-
-
 			}
-
-			/*int prevX = snake[0].getPosition().x;
-			int prevY = snake[0].getPosition().y;*/
-			
 			// adding obstacle 
 			if (snakeSize % 5 == 0 && obstacleUsed == false) {
 				overlapping = false;
@@ -215,9 +216,8 @@ int main()
 					//window.display();
 					obstacleUsed = true;
 				}
-				
+
 			}
-			
 			for (int i = 1; i < snakeSize; i++)
 			{
 				if (snake[0].getPosition() == snake[i].getPosition() && snake[0].getPosition() != newDot.getPosition())
@@ -275,32 +275,6 @@ int main()
 				}
 
 			}
-			/*
-			if (index % 50 == 0)
-			{
-			int prevX = snake[0].getPosition().x;
-			int prevY = snake[0].getPosition().y;
-			if (up == true)	//up
-			{
-			snake[0].move(0, -2 * snake[0].getRadius());
-			snake[1].setPosition(prevX, prevY);
-			}
-			if (down == true)	//down
-			{
-			snake[0].move(0, 2 * snake[0].getRadius());
-			snake[1].setPosition(prevX, prevY);
-			}
-			if (left == true)	//left
-			{
-			snake[0].move(-2 * snake[0].getRadius(), 0);
-			snake[1].setPosition(prevX, prevY);
-			}
-			if (right == true)	//right
-			{
-			snake[0].move(2 * snake[0].getRadius(), 0);
-			snake[1].setPosition(prevX, prevY);
-			}
-			}*/
 			index++;
 			window.clear();
 
@@ -356,26 +330,68 @@ int main()
 
 			window.display();
 		}
-
-
-
 		snake.clear();
-
-
-		
 
 		string message = "Game over\nYour Score was ";
 		message += to_string(snakeSize);
 		message += "\nPress E to return to menu";
+
+		//// checking if high score was beat to prompt new high score
+		//for (int i = 0; i < records.size(); i++)
+		//{
+		//	// score better than i'th place
+		//	if (records[i].getScore() < snakeSize)
+		//	{
+		//		message += "\nNew High Score!";
+		//		message += "\nEnter Name: ";
+
+		//		break;
+		//	}
+		//}
 		snakeSize = 1;
 		obstacleAmount = 0;
 		text.setString(message);
 		window.draw(text);
 		window.display();
+
 		// this while loop keeps the event polling until the letter e is pressed
 		while (exit == false) {
 			while (window.pollEvent(event))
 			{
+
+				//// stuff for checking for new high score and updating high scores list
+				//string newHighScore;
+				//for (int i = 0; i < records.size(); i++)
+				//{
+				//	// score better than i'th place
+				//	if (records[i].getScore() < snakeSize)
+				//	{
+				//		if (event.type == sf::Event::TextEntered)
+				//		{
+				//			// Handle ASCII characters only
+				//			if (event.text.unicode < 128)
+				//			{
+				//				newHighScore += static_cast<char>(event.text.unicode);
+				//				message += newHighScore;
+				//				text.setString(message);
+				//			}
+				//			records[i].setName(newHighScore);
+				//			records[i].setScore(snakeSize);
+				//		}
+				//		// update high scores list
+				//		for (int j = i + 1; j < records.size(); j++)
+				//		{
+				//			records[j] = records[j-1];
+				//		}
+				//		for (int k = 0; i < records.size(); k++)
+				//		{
+				//			highScores << records[k].getName() << std::endl;
+				//			highScores << records[k].getScore() << std::endl;
+				//		}
+				//		break;
+				//	}
+				//}// end high scores stuff
+
 				if (event.type == Event::KeyPressed) {
 					//while (event.key.code != Keyboard::E)
 					//{
@@ -391,7 +407,5 @@ int main()
 		}
 
 	}
-
-
 	return 0;
 }
