@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "snake.h"
 #include "dot.h"
+#include "obstacle.h"
 
 using namespace sf;
 using namespace std;
@@ -24,13 +25,15 @@ int main()
 
 
 	vector<Snake> snake;
+	vector<Obstacle> obstacle;
 	Snake newSnake(Color::Blue, window.getSize().x / 100,
 		Vector2f(window.getSize().x / 10, window.getSize().y / 10));
 	Dot newDot(Color::Blue, window.getSize().x / 100, Vector2f(12, 12));
 	newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
 	int index = 0;
-	int snakeSize = 1;
-	bool up = false, down = false, left = false, right = false, game = false, exit = false;
+	int snakeSize = 1, obstacleAmount = 0;
+	bool up = false, down = false, left = false, right = false, game = false, exit = false, obstacleUsed = false, overlapping = false,
+		collision = false;
 	snake.push_back(newSnake);
 	newSnake.setPosition(snake[0].getPosition().x - (2 * snake[0].getRadius()), snake[0].getPosition().y);
 
@@ -58,6 +61,7 @@ int main()
 	{
 		Event event;
 		exit = false;
+		collision = false;
 		/*while (window.pollEvent(event))
 		{
 
@@ -95,6 +99,7 @@ int main()
 		}
 		window.clear();
 		snake.push_back(newSnake);
+		
 		while (game == true)
 		{
 			window.draw(newDot);
@@ -169,6 +174,50 @@ int main()
 
 			/*int prevX = snake[0].getPosition().x;
 			int prevY = snake[0].getPosition().y;*/
+			
+			// adding obstacle 
+			if (snakeSize % 5 == 0 && obstacleUsed == false) {
+				overlapping = false;
+				if (rand() % 2 == 1) {
+					Obstacle newObstacle(Color::Red, Vector2f(window.getSize().x / 60, window.getSize().y / 30), Vector2f(0, 0));
+					do {
+						newObstacle.setPosition(Vector2f(rand() % (window.getSize().x / 12) * 12, rand() % (window.getSize().y / 12) * 12));
+						int i = 0;
+						while (i < snakeSize && overlapping != true) {
+							if (snake[i].getPosition().x == newObstacle.getPosition().x && snake[i].getPosition().y == newObstacle.getPosition().y) {
+								overlapping = true;
+							}
+							i++;
+						}
+						i = 0;
+						while (i < obstacleAmount && overlapping != true) {
+							if (obstacle[i].getPosition().x == newObstacle.getPosition().x && obstacle[i].getPosition().y == newObstacle.getPosition().y) {
+								overlapping = true;
+							}
+							i++;
+						}
+						if (newDot.getPosition().x == newObstacle.getPosition().x && newDot.getPosition().y == newObstacle.getPosition().y) {
+							overlapping = true;
+						}
+					} while (overlapping == true);
+					obstacle.push_back(newObstacle);
+					obstacleAmount++;
+					//window.draw(newObstacle);
+					//window.display();
+					obstacleUsed = true;
+				}
+				else {
+					Obstacle newObstacle(Color::Red, Vector2f(window.getSize().x / 30, window.getSize().y / 60), Vector2f(0, 0));
+					newObstacle.setPosition(Vector2f(rand() % (window.getSize().x / 12) * 12, rand() % (window.getSize().y / 12) * 12));
+					obstacle.push_back(newObstacle);
+					obstacleAmount++;
+					//window.draw(newObstacle);
+					//window.display();
+					obstacleUsed = true;
+				}
+				
+			}
+			
 			for (int i = 1; i < snakeSize; i++)
 			{
 				if (snake[0].getPosition() == snake[i].getPosition() && snake[0].getPosition() != newDot.getPosition())
@@ -179,6 +228,18 @@ int main()
 					right = false;
 					game = false;
 				}
+			}
+			// checks for collision with obstacle
+			int i = 0;
+			while (i < obstacleAmount && collision == false) {
+				if (obstacle[i].getPosition().x == snake[0].getPosition().x && obstacle[i].getPosition().y == snake[0].getPosition().y) {
+					up = false;
+					down = false;
+					left = false;
+					right = false;
+					game = false;
+				}
+				i++;
 			}
 
 			if (index % 50 == 0)
@@ -247,6 +308,9 @@ int main()
 			{
 				window.draw(snake[i]);
 			}
+			for (int i = 0; i < obstacleAmount; i++) {
+				window.draw(obstacle[i]);
+			}
 			//window.draw(snake[0]);
 			//window.draw(snake[1]);
 			window.draw(newDot);
@@ -261,14 +325,31 @@ int main()
 				game = false;
 			}
 
-
+			// added checks for adding new dot onto a position that already contains an object
 			if (snake[0].getPosition().x == newDot.getPosition().x && snake[0].getPosition().y == newDot.getPosition().y)
 			{
-
-				newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
+				overlapping = false;
+				do {
+					newDot.setPosition(Vector2f((rand() % (window.getSize().x / 12)) * 12, (rand() % (window.getSize().y / 12)) * 12));
+					int i = 0;
+					while (i < snakeSize && overlapping != true) {
+						if (snake[i].getPosition().x == newDot.getPosition().x && snake[i].getPosition().y == newDot.getPosition().y) {
+							overlapping = true;
+						}
+						i++;
+					}
+					i = 0;
+					while (i < obstacleAmount && overlapping != true) {
+						if (obstacle[i].getPosition().x == newDot.getPosition().x && obstacle[i].getPosition().y == newDot.getPosition().y) {
+							overlapping = true;
+						}
+						i++;
+					}
+				} while (overlapping == true);
 				newSnake.setPosition(snake[snakeSize - 1].getOldPosition());
 				snake.push_back(newSnake);
 				snakeSize++;
+				obstacleUsed = false;
 			}
 
 
@@ -285,7 +366,9 @@ int main()
 
 		string message = "Game over\nYour Score was ";
 		message += to_string(snakeSize);
+		message += "\nPress E to return to menu";
 		snakeSize = 1;
+		obstacleAmount = 0;
 		text.setString(message);
 		window.draw(text);
 		window.display();
